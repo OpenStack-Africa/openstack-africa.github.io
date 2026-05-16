@@ -1,0 +1,186 @@
+{
+  "name": "Termii OTP Send and Verify",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-otp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0001-0001-0001-000000000001",
+      "name": "Send OTP Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 200],
+      "webhookId": "termii-send-otp"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate a 6-digit OTP and set expiry\nconst otp = Math.floor(100000 + Math.random() * 900000).toString();\nconst expiresAt = Date.now() + (10 * 60 * 1000); // 10 minutes\nconst phone = $input.first().json.body?.phone;\n\nif (!phone) throw new Error('Phone number is required');\n\nreturn [{ json: { otp, expiresAt, phone } }];"
+      },
+      "id": "b2c3d4e5-0002-0002-0002-000000000002",
+      "name": "Generate OTP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ng.termii.com/api/sms/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "api_key", "value": "YOUR_TERMII_API_KEY" },
+            { "name": "to", "value": "={{ $json.phone }}" },
+            { "name": "from", "value": "YOUR_TERMII_SENDER_ID" },
+            { "name": "sms", "value": "=Your verification code is {{ $json.otp }}. It expires in 10 minutes. Do not share this code with anyone." },
+            { "name": "type", "value": "plain" },
+            { "name": "channel", "value": "dnd" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0003-0003-0003-000000000003",
+      "name": "Send SMS via Termii",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Store OTP in workflow static data keyed by phone number\n// In production, use a database (Redis, Supabase, etc)\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.otps) staticData.otps = {};\n\nconst { phone, otp, expiresAt } = $input.first().json;\nstaticData.otps[phone] = { otp, expiresAt };\n\nreturn [{ json: { success: true, message: 'OTP sent successfully', phone } }];"
+      },
+      "id": "b2c3d4e5-0004-0004-0004-000000000004",
+      "name": "Store OTP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'OTP sent to ' + $json.phone }) }}",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0005-0005-0005-000000000005",
+      "name": "Respond Send OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verify-otp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0006-0006-0006-000000000006",
+      "name": "Verify OTP Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 460],
+      "webhookId": "termii-verify-otp"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst { phone, otp } = $input.first().json.body || {};\n\nif (!phone || !otp) {\n  return [{ json: { valid: false, reason: 'Phone and OTP are required' } }];\n}\n\nconst stored = staticData.otps?.[phone];\n\nif (!stored) {\n  return [{ json: { valid: false, reason: 'No OTP found for this number' } }];\n}\n\nif (Date.now() > stored.expiresAt) {\n  delete staticData.otps[phone];\n  return [{ json: { valid: false, reason: 'OTP has expired' } }];\n}\n\nif (stored.otp !== otp.toString()) {\n  return [{ json: { valid: false, reason: 'Invalid OTP' } }];\n}\n\n// OTP is valid — clean up\ndelete staticData.otps[phone];\nreturn [{ json: { valid: true, phone, verified_at: new Date().toISOString() } }];"
+      },
+      "id": "b2c3d4e5-0007-0007-0007-000000000007",
+      "name": "Verify OTP Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 460]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "condition-verify-001",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0008-0008-0008-000000000008",
+      "name": "Is OTP Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 460]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, verified: true, phone: $json.phone, verified_at: $json.verified_at }) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "b2c3d4e5-0009-0009-0009-000000000009",
+      "name": "Respond Verified",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 380]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, verified: false, reason: $json.reason }) }}",
+        "options": { "responseCode": 400 }
+      },
+      "id": "b2c3d4e5-0010-0010-0010-000000000010",
+      "name": "Respond Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 560]
+    }
+  ],
+  "connections": {
+    "Send OTP Trigger": {
+      "main": [[{ "node": "Generate OTP", "type": "main", "index": 0 }]]
+    },
+    "Generate OTP": {
+      "main": [[{ "node": "Send SMS via Termii", "type": "main", "index": 0 }]]
+    },
+    "Send SMS via Termii": {
+      "main": [[{ "node": "Store OTP", "type": "main", "index": 0 }]]
+    },
+    "Store OTP": {
+      "main": [[{ "node": "Respond Send OK", "type": "main", "index": 0 }]]
+    },
+    "Verify OTP Trigger": {
+      "main": [[{ "node": "Verify OTP Code", "type": "main", "index": 0 }]]
+    },
+    "Verify OTP Code": {
+      "main": [[{ "node": "Is OTP Valid?", "type": "main", "index": 0 }]]
+    },
+    "Is OTP Valid?": {
+      "main": [
+        [{ "node": "Respond Verified", "type": "main", "index": 0 }],
+        [{ "node": "Respond Failed", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": ["termii", "otp", "sms", "authentication", "openstack-africa"],
+  "triggerCount": 2,
+  "updatedAt": "2025-01-15T00:00:00.000Z",
+  "versionId": "openstack-africa-v1"
+}

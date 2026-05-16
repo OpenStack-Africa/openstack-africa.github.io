@@ -1,0 +1,226 @@
+{
+  "name": "Flutterwave Daily Reconciliation to Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "c3d4e5f6-0001-0001-0001-000000000001",
+      "name": "Every Day at 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculate yesterday's date range in WAT (UTC+1)\nconst now = new Date();\nconst yesterday = new Date(now);\nyesterday.setDate(yesterday.getDate() - 1);\n\nconst pad = n => String(n).padStart(2, '0');\nconst fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;\n\nconst from = `${fmt(yesterday)} 00:00:00`;\nconst to = `${fmt(yesterday)} 23:59:59`;\n\nreturn [{ json: { from, to, date_label: fmt(yesterday) } }];"
+      },
+      "id": "c3d4e5f6-0002-0002-0002-000000000002",
+      "name": "Set Date Range",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.flutterwave.com/v3/transactions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer YOUR_FLUTTERWAVE_SECRET_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "from", "value": "={{ $json.from }}" },
+            { "name": "to", "value": "={{ $json.to }}" },
+            { "name": "status", "value": "successful" },
+            { "name": "currency", "value": "NGN" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-0003-0003-000000000003",
+      "name": "Fetch Flutterwave Transactions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst transactions = response.data || [];\n\nif (transactions.length === 0) {\n  return [{ json: { rows: [], summary: { count: 0, total: 0, date: $('Set Date Range').first().json.date_label } } }];\n}\n\nconst formatAmount = (amount) => (amount / 1).toFixed(2); // Flutterwave amounts are not in kobo\n\nconst rows = transactions.map(tx => ({\n  date: tx.created_at ? new Date(tx.created_at).toLocaleDateString('en-NG') : '',\n  time: tx.created_at ? new Date(tx.created_at).toLocaleTimeString('en-NG') : '',\n  reference: tx.tx_ref || '',\n  flw_ref: tx.flw_ref || '',\n  amount: formatAmount(tx.amount),\n  charged_amount: formatAmount(tx.charged_amount),\n  app_fee: formatAmount(tx.app_fee || 0),\n  currency: tx.currency || 'NGN',\n  status: tx.status || '',\n  payment_type: tx.payment_type || '',\n  customer_name: tx.customer?.name || '',\n  customer_email: tx.customer?.email || '',\n  customer_phone: tx.customer?.phone_number || '',\n  narration: tx.narration || '',\n  account_id: tx.account_id || '',\n}));\n\nconst total = transactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);\n\nreturn [{ json: { rows, summary: { count: transactions.length, total: formatAmount(total), date: $('Set Date Range').first().json.date_label } } }];"
+      },
+      "id": "c3d4e5f6-0004-0004-0004-000000000004",
+      "name": "Format Transactions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "condition-rows-001",
+              "leftValue": "={{ $json.summary.count }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0005-0005-0005-000000000005",
+      "name": "Any Transactions?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split rows array into individual items for Google Sheets\nconst { rows, summary } = $input.first().json;\nreturn rows.map(row => ({ json: row }));"
+      },
+      "id": "c3d4e5f6-0006-0006-0006-000000000006",
+      "name": "Split into Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "YOUR_GOOGLE_SHEET_ID", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Reconciliation", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.date }}",
+            "Time": "={{ $json.time }}",
+            "Reference": "={{ $json.reference }}",
+            "FLW Ref": "={{ $json.flw_ref }}",
+            "Amount (NGN)": "={{ $json.amount }}",
+            "Charged Amount": "={{ $json.charged_amount }}",
+            "App Fee": "={{ $json.app_fee }}",
+            "Currency": "={{ $json.currency }}",
+            "Status": "={{ $json.status }}",
+            "Payment Type": "={{ $json.payment_type }}",
+            "Customer Name": "={{ $json.customer_name }}",
+            "Customer Email": "={{ $json.customer_email }}",
+            "Customer Phone": "={{ $json.customer_phone }}",
+            "Narration": "={{ $json.narration }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0007-0007-0007-000000000007",
+      "name": "Append to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1560, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "YOUR_GOOGLE_CREDENTIAL_ID", "name": "YOUR_GOOGLE_CREDENTIAL_NAME" }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "webhookUri": "YOUR_SLACK_WEBHOOK_URL",
+        "text": "",
+        "blocksUi": {
+          "blocksValues": [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "📊 *Daily Reconciliation Complete*"
+              }
+            },
+            {
+              "type": "section",
+              "fields": [
+                { "type": "mrkdwn", "text": "*Date:*\n{{ $('Format Transactions').first().json.summary.date }}" },
+                { "type": "mrkdwn", "text": "*Transactions:*\n{{ $('Format Transactions').first().json.summary.count }}" },
+                { "type": "mrkdwn", "text": "*Total:*\n₦{{ $('Format Transactions').first().json.summary.total }}" },
+                { "type": "mrkdwn", "text": "*Status:*\nAppended to Google Sheets ✅" }
+              ]
+            },
+            {
+              "type": "context",
+              "elements": [
+                { "type": "mrkdwn", "text": "Powered by OpenStack Africa · Flutterwave Reconciliation" }
+              ]
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0008-0008-0008-000000000008",
+      "name": "Notify Slack Summary",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1560, 380],
+      "credentials": {
+        "slackApi": { "id": "YOUR_SLACK_CREDENTIAL_ID", "name": "YOUR_SLACK_CREDENTIAL_NAME" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const summary = $input.first().json.summary;\nconsole.log(`[OpenStack Africa] No transactions on ${summary.date} — skipping sheet append.`);\nreturn $input.all();"
+      },
+      "id": "c3d4e5f6-0009-0009-0009-000000000009",
+      "name": "Log No Transactions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 420]
+    }
+  ],
+  "connections": {
+    "Every Day at 8am": {
+      "main": [[{ "node": "Set Date Range", "type": "main", "index": 0 }]]
+    },
+    "Set Date Range": {
+      "main": [[{ "node": "Fetch Flutterwave Transactions", "type": "main", "index": 0 }]]
+    },
+    "Fetch Flutterwave Transactions": {
+      "main": [[{ "node": "Format Transactions", "type": "main", "index": 0 }]]
+    },
+    "Format Transactions": {
+      "main": [[{ "node": "Any Transactions?", "type": "main", "index": 0 }]]
+    },
+    "Any Transactions?": {
+      "main": [
+        [{ "node": "Split into Rows", "type": "main", "index": 0 }],
+        [{ "node": "Log No Transactions", "type": "main", "index": 0 }]
+      ]
+    },
+    "Split into Rows": {
+      "main": [[{ "node": "Append to Google Sheets", "type": "main", "index": 0 }]]
+    },
+    "Append to Google Sheets": {
+      "main": [[{ "node": "Notify Slack Summary", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "timezone": "Africa/Lagos"
+  },
+  "staticData": null,
+  "tags": ["flutterwave", "google-sheets", "reconciliation", "scheduled", "openstack-africa"],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-15T00:00:00.000Z",
+  "versionId": "openstack-africa-v1"
+}

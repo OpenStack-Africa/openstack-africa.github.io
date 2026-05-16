@@ -1,0 +1,137 @@
+{
+  "name": "Paystack Payment Webhook to Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paystack-webhook",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "paystack-payment-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "condition-001",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "charge.success",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0002-0002-0002-000000000002",
+      "name": "Is Successful Payment?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst payment = data.data;\n\nconst formatAmount = (amount, currency) => {\n  const value = (amount / 100).toFixed(2);\n  const symbols = { NGN: '₦', GHS: 'GH₵', KES: 'KSh', ZAR: 'R', USD: '$' };\n  return `${symbols[currency] || currency}${parseFloat(value).toLocaleString()}`;\n};\n\nconst statusEmoji = {\n  'charge.success': '✅',\n  'charge.failed': '❌',\n  'refund.processed': '↩️',\n};\n\nreturn [{\n  json: {\n    event: data.event,\n    emoji: statusEmoji[data.event] || '💳',\n    reference: payment.reference,\n    amount: formatAmount(payment.amount, payment.currency),\n    currency: payment.currency,\n    customer_email: payment.customer?.email || 'Unknown',\n    customer_name: payment.customer?.name || payment.customer?.email || 'Unknown',\n    channel: payment.channel || 'card',\n    status: payment.status,\n    paid_at: payment.paid_at ? new Date(payment.paid_at).toLocaleString('en-NG', { timeZone: 'Africa/Lagos' }) : 'N/A',\n    bank: payment.authorization?.bank || 'N/A',\n    card_type: payment.authorization?.card_type || 'N/A',\n    last4: payment.authorization?.last4 || 'N/A',\n    gateway_response: payment.gateway_response || 'N/A',\n  }\n}];"
+      },
+      "id": "a1b2c3d4-0003-0003-0003-000000000003",
+      "name": "Format Payment Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 220]
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "webhookUri": "YOUR_SLACK_WEBHOOK_URL",
+        "text": "",
+        "blocksUi": {
+          "blocksValues": [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "{{ $json.emoji }} *New Payment {{ $json.event === 'charge.success' ? 'Received' : 'Event' }}*"
+              }
+            },
+            {
+              "type": "section",
+              "fields": [
+                { "type": "mrkdwn", "text": "*Amount:*\n{{ $json.amount }}" },
+                { "type": "mrkdwn", "text": "*Status:*\n{{ $json.status }}" },
+                { "type": "mrkdwn", "text": "*Customer:*\n{{ $json.customer_name }}" },
+                { "type": "mrkdwn", "text": "*Email:*\n{{ $json.customer_email }}" },
+                { "type": "mrkdwn", "text": "*Reference:*\n`{{ $json.reference }}`" },
+                { "type": "mrkdwn", "text": "*Channel:*\n{{ $json.channel }}" },
+                { "type": "mrkdwn", "text": "*Bank:*\n{{ $json.bank }}" },
+                { "type": "mrkdwn", "text": "*Time:*\n{{ $json.paid_at }}" }
+              ]
+            },
+            {
+              "type": "context",
+              "elements": [
+                { "type": "mrkdwn", "text": "Powered by OpenStack Africa · Paystack Webhook" }
+              ]
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0004-0004-0004-000000000004",
+      "name": "Send Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [900, 220],
+      "credentials": {
+        "slackApi": { "id": "YOUR_SLACK_CREDENTIAL_ID", "name": "YOUR_SLACK_CREDENTIAL_NAME" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log failed or other payment events for review\nconst data = $input.first().json;\nconsole.log(`[OpenStack Africa] Non-success payment event: ${data.event}`, JSON.stringify(data.data?.reference));\nreturn $input.all();"
+      },
+      "id": "a1b2c3d4-0005-0005-0005-000000000005",
+      "name": "Log Other Events",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Is Successful Payment?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Is Successful Payment?": {
+      "main": [
+        [{ "node": "Format Payment Data", "type": "main", "index": 0 }],
+        [{ "node": "Log Other Events", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Payment Data": {
+      "main": [
+        [{ "node": "Send Slack Notification", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": ["paystack", "slack", "payments", "webhook", "openstack-africa"],
+  "triggerCount": 1,
+  "updatedAt": "2025-01-15T00:00:00.000Z",
+  "versionId": "openstack-africa-v1"
+}
