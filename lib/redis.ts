@@ -1,6 +1,9 @@
 import { Redis } from '@upstash/redis'
 
-export const redis = Redis.fromEnv()
+export const redis = new Redis({
+  url: process.env.openstackafrica_KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '',
+  token: process.env.openstackafrica_KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '',
+})
 
 export const getDownloadKey = (templateId: string) => `downloads:${templateId}`
 export const getTotalDownloadsKey = () => `downloads:total`
