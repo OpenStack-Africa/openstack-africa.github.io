@@ -32,7 +32,7 @@ export const templates: Template[] = [
     tags: ['webhook', 'notifications', 'paystack', 'slack', 'realtime'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-15',
-    downloads: 241,
+    downloads: 0,
     difficulty: 'beginner',
   },
   {
@@ -46,7 +46,7 @@ export const templates: Template[] = [
     tags: ['otp', 'sms', 'termii', 'authentication', 'verification'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-15',
-    downloads: 312,
+    downloads: 0,
     difficulty: 'intermediate',
   },
   {
@@ -60,7 +60,7 @@ export const templates: Template[] = [
     tags: ['reconciliation', 'flutterwave', 'google-sheets', 'scheduled', 'finance'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-15',
-    downloads: 187,
+    downloads: 0,
     difficulty: 'intermediate',
   },
   {
@@ -74,7 +74,7 @@ export const templates: Template[] = [
     tags: ['subscription', 'email', 'paystack', 'lifecycle'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-20',
-    downloads: 134,
+    downloads: 0,
     difficulty: 'beginner',
   },
   {
@@ -88,7 +88,7 @@ export const templates: Template[] = [
     tags: ['whatsapp', 'support', 'triage', 'automation'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-22',
-    downloads: 98,
+    downloads: 0,
     difficulty: 'advanced',
   },
   {
@@ -102,7 +102,7 @@ export const templates: Template[] = [
     tags: ['kuda', 'banking', 'alerts', 'balance', 'monitoring'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-25',
-    downloads: 74,
+    downloads: 0,
     difficulty: 'intermediate',
   },
   {
@@ -116,7 +116,7 @@ export const templates: Template[] = [
     tags: ['moniepoint', 'pos', 'airtable', 'reconciliation'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-28',
-    downloads: 91,
+    downloads: 0,
     difficulty: 'beginner',
   },
   {
@@ -130,7 +130,7 @@ export const templates: Template[] = [
     tags: ['reporting', 'paystack', 'telegram', 'scheduled', 'revenue'],
     n8n_version_min: '1.0.0',
     created_at: '2025-02-01',
-    downloads: 203,
+    downloads: 0,
     difficulty: 'beginner',
   },
 ]

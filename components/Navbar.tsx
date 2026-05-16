@@ -15,15 +15,21 @@ export default function Navbar() {
       alignItems: 'center',
       justifyContent: 'space-between',
     }}>
-      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-        <div style={{
-          width: 30, height: 30, background: 'var(--accent)', borderRadius: 7,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: '#000',
-        }}>OS</div>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--text)', letterSpacing: '-0.3px' }}>
-          OpenStack Africa
-        </span>
+      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', flexShrink: 0 }}>
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="8" fill="#00c896"/>
+          <rect x="7" y="10" width="18" height="2.5" rx="1.25" fill="#000"/>
+          <rect x="7" y="14.75" width="12" height="2.5" rx="1.25" fill="#000"/>
+          <rect x="7" y="19.5" width="15" height="2.5" rx="1.25" fill="#000"/>
+        </svg>
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: 'var(--text)', lineHeight: 1.1, letterSpacing: '-0.3px' }}>
+            OpenStack
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 400, fontSize: 10, color: 'var(--accent)', lineHeight: 1.1, letterSpacing: '0.08em' }}>
+            AFRICA
+          </div>
+        </div>
       </Link>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.8rem, 3vw, 2rem)' }}>
@@ -38,7 +44,7 @@ export default function Navbar() {
           <GitFork size={15} />
           <span style={{ display: 'none' }} className="md-show">GitHub</span>
         </a>
-        <a href="https://github.com/OpenStack-Africa/templates/blob/main/Contributing.md"
+        <a href="https://github.com/OpenStack-Africa/templates/blob/main/CONTRIBUTING.md"
           target="_blank" rel="noopener noreferrer"
           style={{
             background: 'var(--accent)', color: '#000',

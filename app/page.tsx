@@ -132,7 +132,7 @@ export default function Home() {
         ) : (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>🔍</div>
-            <p style={{ fontSize: 14 }}>No templates found. <a href="https://github.com/OpenStack-Africa/templates/blob/main/Contributing.md" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Submit the one you built.</a></p>
+            <p style={{ fontSize: 14 }}>No templates found. <a href="https://github.com/OpenStack-Africa/templates/blob/main/CONTRIBUTING.md" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Submit the one you built.</a></p>
           </div>
         )}
       </section>
@@ -150,7 +150,7 @@ export default function Home() {
             <p style={{ color: 'var(--text-muted)', marginBottom: 28, lineHeight: 1.7 }}>
               Every template here was built by a developer solving a real problem. Submit it — the whole community benefits.
             </p>
-            <a href="https://github.com/OpenStack-Africa/templates/blob/main/Contributing.md" target="_blank" rel="noopener noreferrer" style={{
+            <a href="https://github.com/OpenStack-Africa/templates/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" style={{
               background: 'var(--accent)', color: '#000', padding: '12px 24px', borderRadius: 8,
               fontWeight: 700, fontSize: 14, textDecoration: 'none', fontFamily: 'var(--font-display)',
               display: 'inline-flex', alignItems: 'center', gap: 8,

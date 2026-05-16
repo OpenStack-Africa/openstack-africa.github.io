@@ -20,6 +20,8 @@ export default function TemplatePage({ params }: { params: Promise<{ slug: strin
   const [downloaded, setDownloaded] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
+  const [downloadCount, setDownloadCount] = useState(template.downloads)
+
   const handleDownload = async () => {
     setDownloading(true)
     try {
@@ -35,7 +37,15 @@ export default function TemplatePage({ params }: { params: Promise<{ slug: strin
       URL.revokeObjectURL(link.href)
       setDownloaded(true)
       setTimeout(() => setDownloaded(false), 4000)
-    } catch (err) {
+      // Track the download
+      const tracked = await fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId: template.id }),
+      })
+      const data = await tracked.json()
+      setDownloadCount(data.downloads)
+    } catch {
       alert('Download failed. Please try again.')
     } finally {
       setDownloading(false)
@@ -109,7 +119,7 @@ export default function TemplatePage({ params }: { params: Promise<{ slug: strin
               { label: 'Author', value: template.author.name },
               { label: 'Location', value: template.author.location },
               { label: 'n8n version', value: `v${template.n8n_version_min}+` },
-              { label: 'Downloads', value: template.downloads.toString() },
+              { label: 'Downloads', value: downloadCount.toString() },
               { label: 'Added', value: new Date(template.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) },
             ].map(({ label, value }) => (
               <div key={label}>
