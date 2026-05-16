@@ -44,7 +44,7 @@ export default function Navbar() {
           <GitFork size={15} />
           <span style={{ display: 'none' }} className="md-show">GitHub</span>
         </a>
-        <a href="https://github.com/OpenStack-Africa/templates/blob/main/CONTRIBUTING.md"
+        <a href="https://github.com/OpenStack-Africa/templates/blob/main/Contributing.md"
           target="_blank" rel="noopener noreferrer"
           style={{
             background: 'var(--accent)', color: '#000',
