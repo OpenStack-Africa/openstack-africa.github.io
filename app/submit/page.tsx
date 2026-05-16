@@ -27,7 +27,7 @@ export default function SubmitPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[
               { icon: <FileJson size={18} />, title: 'workflow.json', desc: 'The exported n8n workflow. Remove all API keys — use placeholders like YOUR_PAYSTACK_SECRET_KEY.', color: 'var(--accent)' },
-              { icon: <BookOpen size={18} />, title: 'README.md', desc: 'Setup instructions a stranger can follow in under 10 minutes. Use the template format in CONTRIBUTING.md.', color: 'var(--amber)' },
+              { icon: <BookOpen size={18} />, title: 'README.md', desc: 'Setup instructions a stranger can follow in under 10 minutes. Use the template format in Contributing.md.', color: 'var(--amber)' },
               { icon: <Image size={18} />, title: 'preview.png', desc: 'A clean screenshot of the n8n workflow canvas. Minimum 1200px wide. No credentials visible.', color: 'var(--blue)' },
             ].map(({ icon, title, desc, color }) => (
               <div key={title} style={{ display: 'flex', gap: 16 }}>
