@@ -2,12 +2,17 @@ import Link from 'next/link'
 import { Download, ArrowUpRight } from 'lucide-react'
 import { Template, categoryMeta, difficultyMeta } from '@/data/registry'
 
-export default function TemplateCard({ template }: { template: Template }) {
+interface Props {
+  template: Template
+  downloadCount?: number
+}
+
+export default function TemplateCard({ template, downloadCount = 0 }: Props) {
   const cat = categoryMeta[template.category]
   const diff = difficultyMeta[template.difficulty]
 
   return (
-    <Link href={`/templates/${template.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+    <Link href={`/templates/${template.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
       <div style={{
         background: 'var(--bg-card)',
         border: '1px solid var(--border)',
@@ -47,15 +52,20 @@ export default function TemplateCard({ template }: { template: Template }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 18, flexShrink: 0,
           }}>{cat.icon}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{
               fontSize: 11, fontFamily: 'var(--font-mono)',
               color: diff.color, background: `${diff.color}14`,
               padding: '2px 8px', borderRadius: 100,
               border: `1px solid ${diff.color}30`,
             }}>{diff.label}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: 3 }}>
-              <Download size={10} /> {template.downloads}
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 11,
+              color: 'var(--text-dim)',
+              display: 'flex', alignItems: 'center', gap: 3,
+            }}>
+              <Download size={10} />
+              {downloadCount.toLocaleString()}
             </span>
           </div>
         </div>
@@ -94,7 +104,7 @@ export default function TemplateCard({ template }: { template: Template }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 9, fontWeight: 700, color: 'var(--accent)',
             }}>
-              {template.author.name.split(' ').map(n => n[0]).join('').slice(0,2)}
+              {template.author.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>
             {template.author.name.split(' ')[0]} · {template.author.location.split(',')[0]}
           </div>

@@ -1,32 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Simple in-memory store for download counts
-// In production, replace with Vercel KV or Upstash Redis
-const downloadCounts: Record<string, number> = {}
+import { incrementDownload, getAllDownloadCounts, getTotalDownloads } from '@/lib/redis'
+import { templates } from '@/data/registry'
 
 export async function POST(request: NextRequest) {
   try {
     const { templateId } = await request.json()
     if (!templateId) return NextResponse.json({ error: 'templateId required' }, { status: 400 })
 
-    downloadCounts[templateId] = (downloadCounts[templateId] || 0) + 1
+    const validId = templates.find(t => t.id === templateId)
+    if (!validId) return NextResponse.json({ error: 'Invalid templateId' }, { status: 400 })
 
-    return NextResponse.json({ 
-      templateId, 
-      downloads: downloadCounts[templateId] 
-    })
-  } catch {
+    const downloads = await incrementDownload(templateId)
+    return NextResponse.json({ templateId, downloads })
+  } catch (err) {
+    console.error('Download tracking error:', err)
     return NextResponse.json({ error: 'Failed to track download' }, { status: 500 })
   }
 }
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const templateId = searchParams.get('templateId')
-
-  if (templateId) {
-    return NextResponse.json({ templateId, downloads: downloadCounts[templateId] || 0 })
+export async function GET() {
+  try {
+    const templateIds = templates.map(t => t.id)
+    const [counts, total] = await Promise.all([
+      getAllDownloadCounts(templateIds),
+      getTotalDownloads(),
+    ])
+    return NextResponse.json({ counts, total })
+  } catch (err) {
+    console.error('Download fetch error:', err)
+    return NextResponse.json({ error: 'Failed to fetch counts' }, { status: 500 })
   }
-
-  return NextResponse.json({ counts: downloadCounts })
 }
