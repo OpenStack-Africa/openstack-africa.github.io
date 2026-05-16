@@ -59,7 +59,7 @@ export default function Home() {
             fontWeight: 700, fontSize: 14, textDecoration: 'none', fontFamily: 'var(--font-display)',
             display: 'inline-flex', alignItems: 'center', gap: 8,
           }}>Browse templates <ArrowRight size={16} /></a>
-          <a href="https://github.com/openstack-africa" target="_blank" rel="noopener noreferrer" style={{
+          <a href="https://github.com/OpenStack-Africa" target="_blank" rel="noopener noreferrer" style={{
             background: 'transparent', color: 'var(--text)', padding: '12px 24px', borderRadius: 8,
             fontWeight: 500, fontSize: 14, textDecoration: 'none',
             border: '1px solid var(--border-hover)',
@@ -70,7 +70,7 @@ export default function Home() {
 
       <div style={{ maxWidth: 840, margin: '0 auto', padding: '0 2rem 80px' }}>
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden',
           background: 'var(--border)', gap: 1,
         }}>
@@ -132,7 +132,7 @@ export default function Home() {
         ) : (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>🔍</div>
-            <p style={{ fontSize: 14 }}>No templates found. <a href="https://github.com/openstack-africa/templates/blob/main/CONTRIBUTING.md" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Submit the one you built.</a></p>
+            <p style={{ fontSize: 14 }}>No templates found. <a href="https://github.com/OpenStack-Africa/templates/blob/main/CONTRIBUTING.md" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Submit the one you built.</a></p>
           </div>
         )}
       </section>
@@ -141,7 +141,7 @@ export default function Home() {
         <div style={{
           background: 'var(--bg-card)', border: '1px solid rgba(0,200,150,0.15)',
           borderRadius: 16, padding: '56px 48px',
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center',
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 48, alignItems: 'center',
         }}>
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.9rem', lineHeight: 1.2, marginBottom: 16, letterSpacing: '-0.02em' }}>
@@ -150,7 +150,7 @@ export default function Home() {
             <p style={{ color: 'var(--text-muted)', marginBottom: 28, lineHeight: 1.7 }}>
               Every template here was built by a developer solving a real problem. Submit it — the whole community benefits.
             </p>
-            <a href="https://github.com/openstack-africa/templates/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" style={{
+            <a href="https://github.com/OpenStack-Africa/templates/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" style={{
               background: 'var(--accent)', color: '#000', padding: '12px 24px', borderRadius: 8,
               fontWeight: 700, fontSize: 14, textDecoration: 'none', fontFamily: 'var(--font-display)',
               display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -186,7 +186,7 @@ export default function Home() {
           Built by the African developer community · <a href="https://twitter.com/chuukkaa_OG" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>@chuukkaa_OG</a>
         </p>
         <div style={{ display: 'flex', gap: 20 }}>
-          {[{ href: 'https://github.com/openstack-africa', label: 'GitHub' }, { href: 'https://docs.n8n.io', label: 'n8n Docs' }, { href: '/submit', label: 'Submit' }].map(({ href, label }) => (
+          {[{ href: 'https://github.com/OpenStack-Africa', label: 'GitHub' }, { href: 'https://docs.n8n.io', label: 'n8n Docs' }, { href: '/submit', label: 'Submit' }].map(({ href, label }) => (
             <a key={href} href={href} style={{ fontSize: 13, color: 'var(--text-dim)', textDecoration: 'none' }}>{label}</a>
           ))}
         </div>

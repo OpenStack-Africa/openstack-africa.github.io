@@ -9,17 +9,15 @@ export default function Navbar() {
       background: 'rgba(8,8,8,0.92)',
       backdropFilter: 'blur(16px)',
       borderBottom: '1px solid var(--border)',
-      padding: '0 2rem',
+      padding: '0 clamp(1rem, 4vw, 2rem)',
       height: 60,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
     }}>
-      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
         <div style={{
-          width: 30, height: 30,
-          background: 'var(--accent)',
-          borderRadius: 7,
+          width: 30, height: 30, background: 'var(--accent)', borderRadius: 7,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: '#000',
         }}>OS</div>
@@ -28,30 +26,25 @@ export default function Navbar() {
         </span>
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        {[
-          { href: '/#templates', label: 'Templates' },
-          { href: '/submit', label: 'Submit' },
-        ].map(({ href, label }) => (
-          <Link key={href} href={href} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.15s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-            {label}
-          </Link>
-        ))}
-        <a href="https://github.com/openstack-africa" target="_blank" rel="noopener noreferrer"
-          style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', fontSize: 14, transition: 'color 0.15s' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-          <GitFork size={15} /> GitHub
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.8rem, 3vw, 2rem)' }}>
+        <Link href="/#templates" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14 }}>
+          Templates
+        </Link>
+        <Link href="/submit" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14 }}>
+          Submit
+        </Link>
+        <a href="https://github.com/OpenStack-Africa/templates" target="_blank" rel="noopener noreferrer"
+          style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', fontSize: 14 }}>
+          <GitFork size={15} />
+          <span style={{ display: 'none' }} className="md-show">GitHub</span>
         </a>
-        <a href="https://github.com/openstack-africa/templates/blob/main/CONTRIBUTING.md"
+        <a href="https://github.com/OpenStack-Africa/templates/blob/main/CONTRIBUTING.md"
           target="_blank" rel="noopener noreferrer"
           style={{
             background: 'var(--accent)', color: '#000',
-            padding: '7px 16px', borderRadius: 6,
+            padding: '7px 14px', borderRadius: 6,
             fontWeight: 600, fontSize: 13, textDecoration: 'none',
-            fontFamily: 'var(--font-display)',
+            fontFamily: 'var(--font-display)', whiteSpace: 'nowrap',
           }}>
           Contribute →
         </a>

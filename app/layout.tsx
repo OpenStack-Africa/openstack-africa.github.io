@@ -1,25 +1,5 @@
 import type { Metadata } from 'next'
-import { DM_Sans, DM_Mono, Syne } from 'next/font/google'
 import './globals.css'
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-body',
-  display: 'swap',
-})
-
-const dmMono = DM_Mono({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-mono',
-  display: 'swap',
-})
-
-const syne = Syne({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-display',
-})
 
 export const metadata: Metadata = {
   title: 'OpenStack Africa — n8n Templates for African Builders',
@@ -36,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${syne.variable} ${dmSans.variable} ${dmMono.variable}`}>
+    <html lang="en" suppressHydrationWarning>
       <body>{children}</body>
     </html>
   )

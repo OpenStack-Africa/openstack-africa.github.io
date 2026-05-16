@@ -48,7 +48,7 @@ export default function SubmitPage() {
           <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', marginBottom: 20 }}>How to submit</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {[
-              { num: '1', title: 'Fork the repository', code: 'git clone https://github.com/openstack-africa/templates.git' },
+              { num: '1', title: 'Fork the repository', code: 'git clone https://github.com/OpenStack-Africa/templates.git' },
               { num: '2', title: 'Create your template folder', code: 'mkdir templates/payments/paystack-webhook-slack' },
               { num: '3', title: 'Add your three files', code: 'workflow.json + README.md + preview.png' },
               { num: '4', title: 'Open a Pull Request', code: 'git commit -m "add: paystack webhook to slack template"' },
@@ -85,7 +85,7 @@ export default function SubmitPage() {
         </div>
 
         {/* CTA */}
-        <a href="https://github.com/openstack-africa/templates" target="_blank" rel="noopener noreferrer" style={{
+        <a href="https://github.com/OpenStack-Africa/templates" target="_blank" rel="noopener noreferrer" style={{
           background: 'var(--accent)', color: '#000', padding: '14px 28px', borderRadius: 8,
           fontWeight: 700, fontSize: 15, textDecoration: 'none', fontFamily: 'var(--font-display)',
           display: 'inline-flex', alignItems: 'center', gap: 10,
