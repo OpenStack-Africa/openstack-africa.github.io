@@ -97,7 +97,12 @@ export default function TemplateCard({ template, downloadCount = 0 }: Props) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           paddingTop: 14, borderTop: '1px solid var(--border)',
         }}>
-          <div style={{ fontSize: 12, color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: 7 }}>
+          <a
+            href={template.author.contributorId ? `/contributors/${template.author.contributorId}` : '#'}
+            onClick={e => e.stopPropagation()}
+            style={{ fontSize: 12, color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: 7, textDecoration: 'none' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-dim)')}>
             <div style={{
               width: 20, height: 20, borderRadius: '50%',
               background: 'var(--accent-dim)',
@@ -107,7 +112,7 @@ export default function TemplateCard({ template, downloadCount = 0 }: Props) {
               {template.author.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>
             {template.author.name.split(' ')[0]} · {template.author.location.split(',')[0]}
-          </div>
+          </a>
           <span style={{ fontSize: 12, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 3, fontFamily: 'var(--font-mono)' }}>
             View <ArrowUpRight size={12} />
           </span>

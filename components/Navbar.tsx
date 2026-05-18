@@ -23,26 +23,28 @@ export default function Navbar() {
           <rect x="7" y="19.5" width="15" height="2.5" rx="1.25" fill="#000"/>
         </svg>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: 'var(--text)', lineHeight: 1.1, letterSpacing: '-0.3px' }}>
-            OpenStack
-          </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 400, fontSize: 10, color: 'var(--accent)', lineHeight: 1.1, letterSpacing: '0.08em' }}>
-            AFRICA
-          </div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: 'var(--text)', lineHeight: 1.1, letterSpacing: '-0.3px' }}>OpenStack</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 400, fontSize: 10, color: 'var(--accent)', lineHeight: 1.1, letterSpacing: '0.08em' }}>AFRICA</div>
         </div>
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.8rem, 3vw, 2rem)' }}>
-        <Link href="/#templates" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14 }}>
-          Templates
-        </Link>
-        <Link href="/submit" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14 }}>
-          Submit
-        </Link>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.8rem, 3vw, 1.8rem)' }}>
+        {[
+          { href: '/#templates', label: 'Templates' },
+          { href: '/contributors', label: 'Contributors' },
+          { href: '/generate', label: '✦ Generate' },
+          { href: '/submit', label: 'Submit' },
+        ].map(({ href, label }) => (
+          <Link key={href} href={href}
+            style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.15s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
+            {label}
+          </Link>
+        ))}
         <a href="https://github.com/OpenStack-Africa/templates" target="_blank" rel="noopener noreferrer"
           style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5, textDecoration: 'none', fontSize: 14 }}>
           <GitFork size={15} />
-          <span style={{ display: 'none' }} className="md-show">GitHub</span>
         </a>
         <a href="https://github.com/OpenStack-Africa/templates/blob/main/Contributing.md"
           target="_blank" rel="noopener noreferrer"

@@ -10,6 +10,7 @@ export interface Template {
   author: {
     name: string
     twitter?: string
+  contributorId?: string
     location: string
   }
   tags: string[]
@@ -28,7 +29,7 @@ export const templates: Template[] = [
     category: 'payments',
     apis: ['paystack', 'slack'],
     path: 'templates/payments/paystack-webhook-slack',
-    author: { name: 'Chuka Onyekwere', twitter: 'chuukkaa_OG', location: 'Lagos, Nigeria' },
+    author: { name: 'Chuka Onyekwere', twitter: 'chuukkaa_OG', location: 'Lagos, Nigeria', contributorId: 'chuka-onyekwere' },
     tags: ['webhook', 'notifications', 'paystack', 'slack', 'realtime'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-15',
@@ -42,7 +43,7 @@ export const templates: Template[] = [
     category: 'messaging',
     apis: ['termii'],
     path: 'templates/messaging/termii-otp-verification',
-    author: { name: 'Chuka Onyekwere', twitter: 'chuukkaa_OG', location: 'Lagos, Nigeria' },
+    author: { name: 'Chuka Onyekwere', twitter: 'chuukkaa_OG', location: 'Lagos, Nigeria', contributorId: 'chuka-onyekwere' },
     tags: ['otp', 'sms', 'termii', 'authentication', 'verification'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-15',
@@ -56,7 +57,7 @@ export const templates: Template[] = [
     category: 'payments',
     apis: ['flutterwave', 'google-sheets'],
     path: 'templates/payments/flutterwave-reconciliation-sheets',
-    author: { name: 'Chuka Onyekwere', twitter: 'chuukkaa_OG', location: 'Lagos, Nigeria' },
+    author: { name: 'Chuka Onyekwere', twitter: 'chuukkaa_OG', location: 'Lagos, Nigeria', contributorId: 'chuka-onyekwere' },
     tags: ['reconciliation', 'flutterwave', 'google-sheets', 'scheduled', 'finance'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-15',
@@ -70,7 +71,7 @@ export const templates: Template[] = [
     category: 'payments',
     apis: ['paystack', 'sendgrid'],
     path: 'templates/payments/paystack-subscription-email',
-    author: { name: 'Adaeze Nwosu', location: 'Enugu, Nigeria' },
+    author: { name: 'Adaeze Nwosu', location: 'Enugu, Nigeria', contributorId: 'adaeze-nwosu' },
     tags: ['subscription', 'email', 'paystack', 'lifecycle'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-20',
@@ -84,7 +85,7 @@ export const templates: Template[] = [
     category: 'messaging',
     apis: ['whatsapp-business', 'notion', 'slack'],
     path: 'templates/messaging/whatsapp-support-triage',
-    author: { name: 'Tunde Fashola', location: 'Lagos, Nigeria' },
+    author: { name: 'Tunde Fashola', location: 'Lagos, Nigeria', contributorId: 'tunde-fashola' },
     tags: ['whatsapp', 'support', 'triage', 'automation'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-22',
@@ -98,7 +99,7 @@ export const templates: Template[] = [
     category: 'banking',
     apis: ['kuda', 'slack', 'termii'],
     path: 'templates/banking/kuda-low-balance-alert',
-    author: { name: 'Emeka Ibe', location: 'Lagos, Nigeria' },
+    author: { name: 'Emeka Ibe', location: 'Lagos, Nigeria', contributorId: 'emeka-ibe' },
     tags: ['kuda', 'banking', 'alerts', 'balance', 'monitoring'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-25',
@@ -112,7 +113,7 @@ export const templates: Template[] = [
     category: 'banking',
     apis: ['moniepoint', 'airtable'],
     path: 'templates/banking/moniepoint-transaction-airtable',
-    author: { name: 'Amara Ike', location: 'Abuja, Nigeria' },
+    author: { name: 'Amara Ike', location: 'Abuja, Nigeria', contributorId: 'amara-ike' },
     tags: ['moniepoint', 'pos', 'airtable', 'reconciliation'],
     n8n_version_min: '1.0.0',
     created_at: '2025-01-28',
@@ -126,7 +127,7 @@ export const templates: Template[] = [
     category: 'business-ops',
     apis: ['paystack', 'telegram'],
     path: 'templates/business-ops/weekly-revenue-telegram',
-    author: { name: 'Moses Otu', location: 'Abuja, Nigeria' },
+    author: { name: 'Moses Otu', location: 'Abuja, Nigeria', contributorId: 'moses-otu' },
     tags: ['reporting', 'paystack', 'telegram', 'scheduled', 'revenue'],
     n8n_version_min: '1.0.0',
     created_at: '2025-02-01',
