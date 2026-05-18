@@ -57,12 +57,16 @@ export default function GeneratePage() {
 
       clearInterval(stepInterval)
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.error || 'API error')
+        throw new Error(data.error || `API error ${response.status}`)
       }
 
-      const data = await response.json()
+      if (!data.workflow || !data.explanation) {
+        throw new Error('Incomplete response received')
+      }
+
       setResult({
         workflow: data.workflow,
         explanation: data.explanation,
@@ -70,13 +74,7 @@ export default function GeneratePage() {
     } catch (err: unknown) {
       clearInterval(stepInterval)
       const message = err instanceof Error ? err.message : 'Unknown error'
-      if (message.includes('401') || message.includes('403')) {
-        setError('Authentication error. Please try again in a moment.')
-      } else if (message.includes('429')) {
-        setError('Too many requests. Please wait a moment and try again.')
-      } else {
-        setError('Something went wrong generating the workflow. Please try again.')
-      }
+      setError(message || 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
       setStep('')

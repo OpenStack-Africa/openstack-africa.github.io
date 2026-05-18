@@ -10,30 +10,48 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
+      return NextResponse.json({ error: 'GEMINI_API_KEY not set in environment' }, { status: 500 })
     }
 
-    const systemInstruction = `You are an expert n8n workflow builder specializing in African business contexts and APIs.
+    const fullPrompt = `You are an expert n8n workflow builder for African business contexts.
 
-Your job is to generate a complete, valid n8n workflow JSON based on the user's description.
+Respond with ONLY a valid JSON object, no markdown, no backticks, no extra text.
 
-You must respond with ONLY a JSON object in this exact format (no markdown, no backticks, no explanation outside the JSON):
+Format:
 {
-  "workflow": { ...complete n8n workflow JSON... },
-  "explanation": "A clear 3-5 sentence explanation of what this workflow does and how to set it up."
+  "workflow": {
+    "name": "Workflow name here",
+    "nodes": [
+      {
+        "id": "node-001",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [240, 300],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "webhook-path"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [[{ "node": "Next Node Name", "type": "main", "index": 0 }]]
+      }
+    },
+    "settings": { "executionOrder": "v1" },
+    "tags": ["tag1", "tag2"]
+  },
+  "explanation": "3-4 sentence explanation of what this workflow does and how to set it up."
 }
 
-Rules for the workflow JSON:
-- Must be valid n8n workflow format with "name", "nodes", "connections", "settings" fields
-- Use realistic node types: n8n-nodes-base.webhook, n8n-nodes-base.httpRequest, n8n-nodes-base.code, n8n-nodes-base.slack, n8n-nodes-base.googleSheets, n8n-nodes-base.scheduleTrigger, n8n-nodes-base.if, n8n-nodes-base.respondToWebhook
-- For African APIs (Paystack, Flutterwave, Termii, Kuda, Moniepoint, Anchor etc.) use n8n-nodes-base.httpRequest nodes with the correct API endpoints
-- Replace all credentials and API keys with placeholders like YOUR_PAYSTACK_SECRET_KEY, YOUR_TERMII_API_KEY etc.
-- Include at least 3 nodes, maximum 8 nodes
-- Give each node a unique id (use format: "node-001", "node-002" etc.)
-- Position nodes logically left to right (x: 240, 460, 680, 900... y: 300)
-- Set "typeVersion" to 2 for most nodes
-- The workflow name should be descriptive and specific
-- Tags should include relevant API names and use case`
+Rules:
+- Use n8n-nodes-base.httpRequest for African APIs (Paystack, Flutterwave, Termii etc.)
+- Replace all API keys with placeholders like YOUR_PAYSTACK_SECRET_KEY
+- Include 3-6 nodes minimum
+- Positions go left to right: x = 240, 460, 680, 900. y = 300
+
+Create a workflow for: ${prompt}`
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
@@ -41,57 +59,61 @@ Rules for the workflow JSON:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemInstruction }]
-          },
-          contents: [{
-            parts: [{ text: `Create an n8n workflow for: ${prompt}` }]
-          }],
+          contents: [{ parts: [{ text: fullPrompt }] }],
           generationConfig: {
-            temperature: 0.3,
+            temperature: 0.2,
             maxOutputTokens: 4000,
+            responseMimeType: 'application/json',
           }
         }),
       }
     )
 
+    const data = await response.json()
+
     if (!response.ok) {
-      const err = await response.text()
-      console.error('Gemini API error:', err)
-      return NextResponse.json({ error: 'Failed to generate workflow' }, { status: 500 })
+      console.error('Gemini error status:', response.status, JSON.stringify(data))
+      return NextResponse.json({
+        error: `Gemini API error: ${data?.error?.message || response.status}`
+      }, { status: 500 })
     }
 
-    const data = await response.json()
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
 
     if (!text) {
-      return NextResponse.json({ error: 'No response from AI' }, { status: 500 })
+      console.error('Empty Gemini response:', JSON.stringify(data))
+      return NextResponse.json({ error: 'Empty response from Gemini' }, { status: 500 })
     }
 
-    // Strip markdown code blocks if present
-    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    // Clean any accidental markdown
+    const cleaned = text
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim()
 
     try {
       const parsed = JSON.parse(cleaned)
+
+      if (!parsed.workflow || !parsed.explanation) {
+        console.error('Missing fields in parsed response:', Object.keys(parsed))
+        return NextResponse.json({ error: 'Invalid workflow structure returned' }, { status: 500 })
+      }
+
       return NextResponse.json({
         workflow: JSON.stringify(parsed.workflow, null, 2),
-        explanation: parsed.explanation || 'Workflow generated successfully.',
+        explanation: parsed.explanation,
       })
-    } catch {
-      // Try to extract JSON from the response
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
-        return NextResponse.json({
-          workflow: JSON.stringify(parsed.workflow, null, 2),
-          explanation: parsed.explanation || 'Workflow generated successfully.',
-        })
-      }
-      console.error('Could not parse Gemini response:', cleaned.slice(0, 200))
-      return NextResponse.json({ error: 'Could not parse generated workflow' }, { status: 500 })
+    } catch (parseErr) {
+      console.error('JSON parse error:', parseErr)
+      console.error('Raw text was:', cleaned.slice(0, 300))
+      return NextResponse.json({
+        error: 'Could not parse the generated workflow. Please try again.'
+      }, { status: 500 })
     }
+
   } catch (err) {
-    console.error('Generate error:', err)
+    console.error('Generate route error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
