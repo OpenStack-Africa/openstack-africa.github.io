@@ -49,64 +49,24 @@ export default function GeneratePage() {
     }, 1800)
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 4000,
-          system: `You are an expert n8n workflow builder specializing in African business contexts and APIs.
-
-Your job is to generate a complete, valid n8n workflow JSON based on the user's description.
-
-You must respond with ONLY a JSON object in this exact format (no markdown, no backticks, no explanation outside the JSON):
-{
-  "workflow": { ...complete n8n workflow JSON... },
-  "explanation": "A clear 3-5 sentence explanation of what this workflow does and how to set it up."
-}
-
-Rules for the workflow JSON:
-- Must be valid n8n workflow format with "name", "nodes", "connections", "settings" fields
-- Use realistic node types: n8n-nodes-base.webhook, n8n-nodes-base.httpRequest, n8n-nodes-base.code, n8n-nodes-base.slack, n8n-nodes-base.googleSheets, n8n-nodes-base.scheduleTrigger, n8n-nodes-base.if, n8n-nodes-base.respondToWebhook
-- For African APIs (Paystack, Flutterwave, Termii, Kuda, Moniepoint, Anchor etc.) use n8n-nodes-base.httpRequest nodes with the correct API endpoints
-- Replace all credentials and API keys with placeholders like YOUR_PAYSTACK_SECRET_KEY, YOUR_TERMII_API_KEY etc.
-- Include at least 3 nodes, maximum 8 nodes
-- Give each node a unique id (use format: "node-001", "node-002" etc.)
-- Position nodes logically left to right (x: 240, 460, 680, 900... y: 300)
-- Set "typeVersion" to 2 for most nodes
-- The workflow name should be descriptive and specific
-- Tags should include relevant API names and use case`,
-          messages: [{ role: 'user', content: `Create an n8n workflow for: ${prompt}` }],
-        }),
+        body: JSON.stringify({ prompt }),
       })
 
       clearInterval(stepInterval)
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        const err = await response.json()
+        throw new Error(err.error || 'API error')
       }
 
       const data = await response.json()
-      const text = data.content?.[0]?.text || ''
-
-      try {
-        const parsed = JSON.parse(text)
-        setResult({
-          workflow: JSON.stringify(parsed.workflow, null, 2),
-          explanation: parsed.explanation,
-        })
-      } catch {
-        const jsonMatch = text.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0])
-          setResult({
-            workflow: JSON.stringify(parsed.workflow, null, 2),
-            explanation: parsed.explanation || 'Workflow generated successfully.',
-          })
-        } else {
-          throw new Error('Could not parse workflow JSON')
-        }
-      }
+      setResult({
+        workflow: data.workflow,
+        explanation: data.explanation,
+      })
     } catch (err: unknown) {
       clearInterval(stepInterval)
       const message = err instanceof Error ? err.message : 'Unknown error'
