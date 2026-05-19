@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'OpenStack Africa',
     description: 'n8n workflow templates built for African developers',
-    url: 'https://openstackafrica.dev',
+    url: 'https://openstack-africa.online',
     siteName: 'OpenStack Africa',
     type: 'website',
   },
@@ -17,7 +18,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   )
 }
