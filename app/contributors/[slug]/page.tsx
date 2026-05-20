@@ -162,6 +162,18 @@ export default function ContributorPage({ params }: { params: Promise<{ slug: st
           </div>
         </div>
 
+        {/* Certificate CTA */}
+        <div style={{ background: 'rgba(0,200,150,0.04)', border: '1px solid rgba(0,200,150,0.15)', borderRadius: 12, padding: '20px 24px', marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--text)', marginBottom: 4 }}>Contributor Certificate</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Download or share your verified contributor certificate</div>
+          </div>
+          <Link href={`/contributors/${contributor.id}/certificate`}
+            style={{ background: 'var(--accent)', color: '#000', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 13, textDecoration: 'none', fontFamily: 'var(--font-display)', display: 'inline-flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
+            View Certificate →
+          </Link>
+        </div>
+
         {/* Their templates */}
         <div>
           <h2 style={{

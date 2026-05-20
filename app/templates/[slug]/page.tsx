@@ -2,7 +2,7 @@
 import { use, useState } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Download, ArrowLeft, ExternalLink, GitFork, CheckCircle, Copy, BookOpen, GitBranch } from 'lucide-react'
+import { Download, ArrowLeft, ExternalLink, GitFork, CheckCircle, Copy, BookOpen, GitBranch, Share2 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import { templates, categoryMeta, difficultyMeta } from '@/data/registry'
 import { readmes } from '@/data/readmes'
@@ -144,6 +144,7 @@ export default function TemplatePage({ params }: { params: Promise<{ slug: strin
   const [downloadCount, setDownloadCount] = useState(template.downloads)
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState<'setup' | 'readme' | 'diagram'>('setup')
+  const [shared, setShared] = useState(false)
 
   const readme = readmes[template.id]
 
@@ -187,6 +188,23 @@ export default function TemplatePage({ params }: { params: Promise<{ slug: strin
     } catch {
       alert('Copy failed. Please try downloading instead.')
     }
+  }
+
+  const handleShare = () => {
+    const url = window.location.href
+    if (navigator.share) {
+      navigator.share({ title: template.title, text: `Check out this n8n workflow template: ${template.title}`, url })
+    } else {
+      navigator.clipboard.writeText(url)
+      setShared(true)
+      setTimeout(() => setShared(false), 2500)
+    }
+  }
+
+  const handleTweet = () => {
+    const text = encodeURIComponent(`Just downloaded the "${template.title}" template from @OpenStackAfrica 🔥 Free n8n workflows for African developers 🌍`)
+    const url = encodeURIComponent(window.location.href)
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank')
   }
 
   const tabs = [

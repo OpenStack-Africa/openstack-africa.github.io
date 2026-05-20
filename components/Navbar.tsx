@@ -33,6 +33,7 @@ export default function Navbar() {
           { href: '/#templates', label: 'Templates' },
           { href: '/contributors', label: 'Contributors' },
           { href: '/generate', label: '✦ Generate' },
+          { href: '/requests', label: 'Requests' },
           { href: '/status', label: 'Status' },
           { href: '/submit', label: 'Submit' },
         ].map(({ href, label }) => (
