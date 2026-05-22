@@ -35,7 +35,7 @@ export default function Navbar() {
           { href: '/generate', label: '✦ Generate' },
           { href: '/requests', label: 'Requests' },
           { href: '/status', label: 'Status' },
-          { href: '/submit', label: 'Submit' },
+          { href: '/contribute', label: 'Contribute' },
         ].map(({ href, label }) => (
           <Link key={href} href={href}
             style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color 0.15s' }}
