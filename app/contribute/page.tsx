@@ -24,6 +24,7 @@ export default function ContributePage() {
   const [error, setError] = useState('')
   const [prUrl, setPrUrl] = useState('')
 
+  // Form fields
   const [templateName, setTemplateName] = useState('')
   const [slug, setSlug] = useState('')
   const [category, setCategory] = useState('')
@@ -37,6 +38,8 @@ export default function ContributePage() {
   const [authorTwitter, setAuthorTwitter] = useState('')
   const [jsonError, setJsonError] = useState('')
   const [fileName, setFileName] = useState('')
+  const [generatingReadme, setGeneratingReadme] = useState(false)
+  const [customApi, setCustomApi] = useState('')
 
   const allChecked = CHECKLIST.every(c => checked.has(c.id))
 
@@ -64,25 +67,6 @@ export default function ContributePage() {
     } catch {
       setJsonError('Invalid JSON — check for syntax errors')
     }
-  }
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setFileName(file.name)
-    const reader = new FileReader()
-    reader.onload = ev => {
-      const content = ev.target?.result as string
-      validateJson(content)
-      // Auto-fill template name from workflow name if empty
-      try {
-        const parsed = JSON.parse(content)
-        if (parsed.name && !templateName) {
-          handleNameChange(parsed.name)
-        }
-      } catch {}
-    }
-    reader.readAsText(file)
   }
 
   const generateReadme = () => {
@@ -152,6 +136,7 @@ ${authorTwitter ? `- Twitter: @${authorTwitter}` : ''}`
 
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '60px 2rem 100px' }}>
 
+        {/* Header */}
         <div style={{ marginBottom: 40 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.2)', borderRadius: 100, padding: '5px 14px', marginBottom: 18, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--accent)' }}>
             <GitFork size={12} /> Contribute a template
@@ -185,6 +170,7 @@ ${authorTwitter ? `- Twitter: @${authorTwitter}` : ''}`
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '28px 28px 24px', marginBottom: 20 }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', marginBottom: 6 }}>Before you submit</h2>
               <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24, lineHeight: 1.6 }}>Check every box to confirm your template is ready. Our GitHub Action will also validate these automatically when your PR is opened.</p>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {CHECKLIST.map(item => {
                   const isChecked = checked.has(item.id)
@@ -204,6 +190,7 @@ ${authorTwitter ? `- Twitter: @${authorTwitter}` : ''}`
               </div>
             </div>
 
+            {/* Quick reference */}
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: '20px 24px', marginBottom: 24 }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', marginBottom: 14 }}>Required files</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -238,9 +225,11 @@ ${authorTwitter ? `- Twitter: @${authorTwitter}` : ''}`
         {step === 'form' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
+            {/* Template info */}
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '24px 28px' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', marginBottom: 20 }}>Template details</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
                 <div>
                   <label style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: 6 }}>TEMPLATE NAME *</label>
                   <input value={templateName} onChange={e => handleNameChange(e.target.value)} placeholder="e.g. Paystack payment webhook to Slack"
@@ -286,6 +275,28 @@ ${authorTwitter ? `- Twitter: @${authorTwitter}` : ''}`
                       )
                     })}
                   </div>
+                  {/* Custom API input */}
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <input value={customApi} onChange={e => setCustomApi(e.target.value)}
+                      placeholder="Add custom API not listed above..."
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && customApi.trim()) {
+                          setSelectedApis(prev => prev.includes(customApi.trim()) ? prev : [...prev, customApi.trim()])
+                          setCustomApi('')
+                        }
+                      }}
+                      style={{ flex: 1, background: '#0d0d0d', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--text)', fontFamily: 'var(--font-mono)', outline: 'none' }}
+                      onFocus={e => (e.target.style.borderColor = 'var(--accent)')}
+                      onBlur={e => (e.target.style.borderColor = 'var(--border)')} />
+                    <button onClick={() => {
+                      if (customApi.trim()) {
+                        setSelectedApis(prev => prev.includes(customApi.trim()) ? prev : [...prev, customApi.trim()])
+                        setCustomApi('')
+                      }
+                    }} style={{ background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.3)', color: 'var(--accent)', padding: '8px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+                      + Add
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -297,58 +308,33 @@ ${authorTwitter ? `- Twitter: @${authorTwitter}` : ''}`
               </div>
             </div>
 
-            {/* Workflow JSON — with file upload */}
+            {/* Workflow JSON */}
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '24px 28px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem' }}>Workflow JSON *</h2>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <label style={{ background: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.2)', color: 'var(--accent)', padding: '6px 14px', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Upload size={12} /> Upload .json file
-                    <input type="file" accept=".json" style={{ display: 'none' }} onChange={handleFileUpload} />
-                  </label>
-                  <a href="https://docs.n8n.io/workflows/export-import/" target="_blank" rel="noopener noreferrer"
-                    style={{ fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    How to export <ExternalLink size={11} />
-                  </a>
-                </div>
+                <a href="https://docs.n8n.io/workflows/export-import/" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'none', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  How to export <ExternalLink size={11} />
+                </a>
               </div>
-
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
-                Upload your workflow.json file directly, or paste the contents below.
-              </p>
-
-              {/* File uploaded indicator */}
-              {fileName && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, padding: '8px 12px', background: 'rgba(0,200,150,0.06)', border: '1px solid rgba(0,200,150,0.2)', borderRadius: 6 }}>
-                  <CheckCircle size={13} color="var(--accent)" />
-                  <span style={{ fontSize: 12, color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}>{fileName} uploaded</span>
-                </div>
-              )}
-
-              <textarea value={workflowJson} onChange={e => validateJson(e.target.value)}
-                placeholder='{"name": "Your Workflow", "nodes": [...], "connections": {...}}'
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>In n8n: open your workflow → ⋯ menu → Download. Paste the contents here.</p>
+              <textarea value={workflowJson} onChange={e => validateJson(e.target.value)} placeholder='{"name": "Your Workflow", "nodes": [...], "connections": {...}}'
                 rows={8} style={{ width: '100%', background: '#0d0d0d', border: `1px solid ${jsonError ? '#e84393' : 'var(--border)'}`, borderRadius: 8, padding: '12px 14px', fontSize: 12, color: '#a8d8a8', fontFamily: 'var(--font-mono)', outline: 'none', resize: 'vertical', lineHeight: 1.6 }}
-                onFocus={e => (e.target.style.borderColor = jsonError ? '#e84393' : 'var(--accent)')}
-                onBlur={e => (e.target.style.borderColor = jsonError ? '#e84393' : 'var(--border)')} />
-
+                onFocus={e => (e.target.style.borderColor = jsonError ? '#e84393' : 'var(--accent)')} onBlur={e => (e.target.style.borderColor = jsonError ? '#e84393' : 'var(--border)')} />
               {jsonError && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 8, fontSize: 12, color: '#e84393', fontFamily: 'var(--font-mono)' }}>
                   <AlertCircle size={13} /> {jsonError}
                 </div>
               )}
-              {workflowJson && !jsonError && (
-                <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 6, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle size={12} /> Valid workflow JSON
-                </div>
-              )}
+              {workflowJson && !jsonError && <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 6, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 6 }}><CheckCircle size={12} /> Valid workflow JSON</div>}
             </div>
 
             {/* README */}
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '24px 28px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem' }}>README.md *</h2>
-                <button onClick={generateReadme} style={{ background: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.2)', color: 'var(--accent)', padding: '6px 14px', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Upload size={12} /> Auto-generate template
+                <button onClick={generateReadme} disabled={generatingReadme || !templateName}
+                  style={{ background: generatingReadme ? '#1a1a1a' : 'rgba(0,200,150,0.08)', border: `1px solid ${generatingReadme ? 'var(--border)' : 'rgba(0,200,150,0.2)'}`, color: generatingReadme ? 'var(--text-dim)' : 'var(--accent)', padding: '6px 14px', borderRadius: 6, cursor: generatingReadme || !templateName ? 'not-allowed' : 'pointer', fontSize: 12, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {generatingReadme ? '✦ Generating...' : <><Upload size={12} /> AI Generate README</>}
                 </button>
               </div>
               <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>Setup instructions for users. Click "Auto-generate" to get a pre-filled template, then fill in the details.</p>
